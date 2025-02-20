@@ -1,31 +1,27 @@
-import { StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import VideoList from "../../components/VideoList";
 
-import EditScreenInfo from '@/components/EditScreenInfo';
-import { Text, View } from '@/components/Themed';
-
-export default function TabOneScreen() {
+export default function Home() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tab One</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
+    <View className="flex-1 bg-gray-50">
+      <View className="px-4 py-6 bg-white border-b border-gray-200">
+        <Text className="text-2xl font-bold text-gray-800">Video Diary</Text>
+        <Text className="text-sm text-gray-500 mt-1">Your video memories</Text>
+      </View>
+
+      <ScrollView className="flex-1">
+        <View className="p-4">
+          <VideoList />
+        </View>
+      </ScrollView>
+
+      <TouchableOpacity
+        className="absolute bottom-6 right-6 w-14 h-14 bg-blue-500 rounded-full items-center justify-center shadow-lg"
+        activeOpacity={0.8}
+      >
+        <Ionicons name="add" size={30} color="white" />
+      </TouchableOpacity>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
-  },
-});
