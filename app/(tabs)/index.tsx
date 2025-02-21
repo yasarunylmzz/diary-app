@@ -2,6 +2,7 @@ import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import VideoList from "../../components/VideoList";
+import { Link } from "expo-router";
 
 export default function Home() {
   return (
@@ -17,12 +18,12 @@ export default function Home() {
         </View>
       </ScrollView>
 
-      <TouchableOpacity
+      <Link
+        href={"/CreateVideoNote"}
         className="absolute bottom-6 right-6 w-14 h-14 bg-blue-500 rounded-full items-center justify-center shadow-lg"
-        activeOpacity={0.8}
       >
         <Ionicons name="add" size={30} color="white" />
-      </TouchableOpacity>
+      </Link>
     </SafeAreaView>
   );
 }
