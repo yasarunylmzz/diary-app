@@ -26,82 +26,82 @@ const DetailsPage = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <View className="bg-white rounded-t-3xl -mt-5 pt-6 px-5 flex-1">
+    <SafeAreaView className="flex-1 bg-gray-900">
+      <View className="bg-gray-900 rounded-t-3xl -mt-5 pt-6 px-5 flex-1">
         <TouchableOpacity
           onPress={() => router.back()}
-          className="bg-white w-10 h-10 rounded-full items-center justify-center"
+          className="bg-gray-700 w-10 h-10 rounded-full items-center justify-center"
         >
-          <Ionicons name="arrow-back" size={24} color="#333" />
+          <Ionicons name="arrow-back" size={24} color="#E5E7EB" />
         </TouchableOpacity>
 
-        <View className="flex-row justify-between items-center mb-4">
-          <Text className="text-2xl font-bold text-gray-800">
+        <View className="flex-row justify-between items-center mb-4 mt-2">
+          <Text className="text-2xl font-bold text-gray-100">
             {dummyData.title}
           </Text>
           <TouchableOpacity
             onPress={() => setIsFavorite(!isFavorite)}
-            className="w-10 h-10 rounded-full bg-gray-100 items-center justify-center"
+            className="w-10 h-10 rounded-full bg-gray-700 items-center justify-center"
           >
             <Ionicons
               name={isFavorite ? "heart" : "heart-outline"}
               size={22}
-              color={isFavorite ? "#ff4569" : "#666"}
+              color={isFavorite ? "#EF4444" : "#9CA3AF"}
             />
           </TouchableOpacity>
         </View>
 
         <View className="flex-row space-x-4 mb-6">
-          <View className="flex-row items-center bg-blue-50 px-3 py-1 rounded-full">
-            <Ionicons name="time-outline" size={16} color="#4169E1" />
-            <Text className="text-blue-600 ml-1 font-medium">
+          <View className="flex-row items-center bg-indigo-900/30 px-3 py-1 rounded-full">
+            <Ionicons name="time-outline" size={16} color="#818CF8" />
+            <Text className="text-indigo-400 ml-1 font-medium">
               {dummyData.duration}s
             </Text>
           </View>
-          <View className="flex-row items-center bg-purple-50 px-3 py-1 rounded-full">
-            <Ionicons name="calendar-outline" size={16} color="#7749BD" />
-            <Text className="text-purple-600 ml-1 font-medium">
+          <View className="flex-row items-center bg-indigo-900/30 px-3 py-1 rounded-full">
+            <Ionicons name="calendar-outline" size={16} color="#818CF8" />
+            <Text className="text-indigo-400 ml-1 font-medium">
               {dummyData.createdAt}
             </Text>
           </View>
         </View>
 
         <ScrollView className="flex-1 mb-6">
-          <Text className="text-lg text-gray-700 leading-relaxed">
+          <Text className="text-lg text-gray-300 leading-relaxed">
             {dummyData.description}
           </Text>
         </ScrollView>
 
         <View className="flex-row flex-wrap mb-4 justify-center">
-          <View className="bg-gray-100 px-3 py-1 rounded-full mr-2 mb-2">
-            <Text className="text-gray-600">#günlük</Text>
+          <View className="bg-gray-700 px-3 py-1 rounded-full mr-2 mb-2">
+            <Text className="text-gray-300">#günlük</Text>
           </View>
-          <View className="bg-gray-100 px-3 py-1 rounded-full mr-2 mb-2">
-            <Text className="text-gray-600">#sahil</Text>
+          <View className="bg-gray-700 px-3 py-1 rounded-full mr-2 mb-2">
+            <Text className="text-gray-300">#sahil</Text>
           </View>
-          <View className="bg-gray-100 px-3 py-1 rounded-full mr-2 mb-2">
-            <Text className="text-gray-600">#yürüyüş</Text>
+          <View className="bg-gray-700 px-3 py-1 rounded-full mr-2 mb-2">
+            <Text className="text-gray-300">#yürüyüş</Text>
           </View>
         </View>
 
         <View className="flex-row justify-around items-end pb-6">
           <TouchableOpacity className="items-center">
-            <View className="w-12 h-12 rounded-full bg-blue-50 items-center justify-center mb-1">
-              <Ionicons name="share-outline" size={24} color="#4169E1" />
+            <View className="w-12 h-12 rounded-full bg-gray-700 items-center justify-center mb-1">
+              <Ionicons name="share-outline" size={24} color="#818CF8" />
             </View>
-            <Text className="text-gray-600">Paylaş</Text>
+            <Text className="text-gray-400">Paylaş</Text>
           </TouchableOpacity>
           <TouchableOpacity className="items-center">
-            <View className="w-12 h-12 rounded-full bg-green-50 items-center justify-center mb-1">
-              <Ionicons name="pencil-outline" size={24} color="#34A853" />
+            <View className="w-12 h-12 rounded-full bg-gray-700 items-center justify-center mb-1">
+              <Ionicons name="pencil-outline" size={24} color="#34D399" />
             </View>
-            <Text className="text-gray-600">Düzenle</Text>
+            <Text className="text-gray-400">Düzenle</Text>
           </TouchableOpacity>
           <TouchableOpacity className="items-center">
-            <View className="w-12 h-12 rounded-full bg-red-50 items-center justify-center mb-1">
-              <Ionicons name="trash-outline" size={24} color="#EA4335" />
+            <View className="w-12 h-12 rounded-full bg-gray-700 items-center justify-center mb-1">
+              <Ionicons name="trash-outline" size={24} color="#EF4444" />
             </View>
-            <Text className="text-gray-600">Sil</Text>
+            <Text className="text-gray-400">Sil</Text>
           </TouchableOpacity>
         </View>
       </View>

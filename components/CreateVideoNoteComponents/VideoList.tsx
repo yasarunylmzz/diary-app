@@ -3,7 +3,6 @@ import { Ionicons } from "@expo/vector-icons";
 import VideoCard from "./VideoCard";
 
 export default function VideoList() {
-  // Örnek video verileri
   const videos = [
     {
       id: "1",
@@ -11,7 +10,7 @@ export default function VideoList() {
       description:
         "Bugün harika bir gündü! Sabah erkenden kalkıp sahilde yürüyüş yaptım...",
       videoUri:
-        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", // Expo örnek video
+        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
       duration: "5",
       createdAt: "12 Mart 2024",
     },
@@ -21,25 +20,21 @@ export default function VideoList() {
       description:
         "Bu akşam yeni projemi planladım ve bazı önemli kararlar aldım...",
       videoUri:
-        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", // Expo örnek video
+        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
       duration: "4",
       createdAt: "11 Mart 2024",
     },
   ];
 
-  // Boş durum kontrolü
   if (videos.length === 0) {
     return (
-      <View className="flex-1 items-center justify-center py-20">
-        <View className="w-20 h-20 bg-gray-100 rounded-full items-center justify-center mb-4">
-          <Ionicons name="videocam-outline" size={32} color="#9CA3AF" />
+      <View className="p-4">
+        <View className="mt-6 items-center">
+          <Ionicons name="videocam-outline" size={40} color="#4b5563" />
+          <Text className="text-center text-gray-500 mt-2 text-sm px-8">
+            Henüz video eklemediniz, alttaki butondan ilk anınızı kaydedin!
+          </Text>
         </View>
-        <Text className="text-gray-500 text-lg font-medium">
-          Henüz video yok
-        </Text>
-        <Text className="text-gray-400 text-sm mt-1">
-          Yeni video eklemek için + butonuna dokun
-        </Text>
       </View>
     );
   }
@@ -55,7 +50,6 @@ export default function VideoList() {
           duration={video.duration}
           createdAt={video.createdAt}
           onPress={() => {
-            // Video detay sayfasına yönlendirme
             console.log(`Video ${video.id} tıklandı`);
           }}
         />
