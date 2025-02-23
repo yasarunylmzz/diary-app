@@ -29,7 +29,13 @@
     },
     "plugins": [
       "expo-router",
-      "expo-video",
+      [
+        "expo-video",
+        {
+          "supportsBackgroundPlayback": true,
+          "supportsPictureInPicture": true
+        }
+      ],
       "expo-sqlite"
     ],
     "experiments": {

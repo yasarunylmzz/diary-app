@@ -88,15 +88,6 @@ export default function TabTwoScreen() {
           </View>
         )}
       </ScrollView>
-
-      <Link
-        href={"/CreateVideoNote"}
-        className="absolute bottom-8 right-6 w-16 h-16 bg-blue-600 rounded-2xl items-center justify-center shadow-xl shadow-blue-500/30 active:bg-blue-700"
-      >
-        <View className="flex items-center w-full h-full font-extrabold justify-center">
-          <Ionicons name="add" size={32} color="white" />
-        </View>
-      </Link>
     </SafeAreaView>
   );
 }

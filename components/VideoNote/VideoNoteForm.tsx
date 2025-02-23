@@ -7,10 +7,11 @@ import {
 } from "react-native";
 import { useState, useRef, useEffect } from "react";
 import { FontAwesome } from "@expo/vector-icons";
-import { ScrollView } from "react-native-gesture-handler";
-import { LinearGradient } from "expo-linear-gradient";
+import { useVideoStore } from "@/store/useVideoStore";
 
 const VideoNoteForm = ({ onSave }: any) => {
+  const { video } = useVideoStore((state) => state);
+  console.log("Video", video?.filePath);
   const [note, setNote] = useState({ name: "", description: "" });
   const [isFocused, setIsFocused] = useState({
     name: false,
@@ -57,21 +58,15 @@ const VideoNoteForm = ({ onSave }: any) => {
   };
 
   return (
-    <View className="bg-gradient-to-b from-gray-900 to-gray-800 rounded-3xl shadow-2xl p-1 mx-2 my-4">
-      <View className="flex-row items-center justify-between mb-7">
+    <View className="bg-gradient-to-b from-gray-900 to-gray-800 rounded-3xl shadow-2xl mt-10 mx-2 my-4">
+      <View className="flex-row items-center justify-between  mb-3">
         <View className="flex-row items-center">
-          <View className=" rounded-full bg-blue-600 p-4 mr-3">
+          <View className=" rounded-full mr-3">
             <FontAwesome name="pencil" size={20} color="#ffffff" />
           </View>
           <Text className="text-white text-xl font-bold tracking-wide">
             Video Notları
           </Text>
-        </View>
-
-        <View className="flex-row">
-          <View className="w-2 h-2 rounded-full bg-blue-500 mr-1" />
-          <View className="w-2 h-2 rounded-full bg-indigo-500 mr-1" />
-          <View className="w-2 h-2 rounded-full bg-purple-500" />
         </View>
       </View>
 

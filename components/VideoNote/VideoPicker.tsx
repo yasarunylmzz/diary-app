@@ -1,26 +1,41 @@
 import { View, TouchableOpacity, Text } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import { useVideoStore } from "@/store/useVideoStore";
 
 const VideoPicker = ({ onVideoPicked, onClose }: any) => {
-  const pickVideo = async () => {
-    const permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
+  const setVideo = useVideoStore((state) => state.setVideo);
 
-    if (!permissionResult.granted) {
+  const pickVideo = async () => {
+    const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    console.log("Permission granted?", granted);
+    if (!granted) {
       alert("Permission to access camera roll is required!");
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+      mediaTypes: "videos", // Yeni API ile uyumlu şekilde değiştirdim
       quality: 1,
     });
 
     if (!result.canceled && result.assets?.[0]) {
-      onVideoPicked(result.assets[0]);
+      const video = {
+        id: Date.now(),
+        name: result.assets[0].fileName || "video.mp4",
+        description: "",
+        filePath: result.assets[0].uri,
+        createdAt: new Date().toISOString(),
+        tags: [], // Add an empty array for tags
+        duration: result.assets[0].duration ?? 0,
+      };
+
+      setVideo(video);
+      onVideoPicked(video);
     }
   };
+
   return (
     <View className="w-full p-6 bg-white rounded-2xl shadow-xl shadow-blue-900/20">
       <View className="items-center mb-6">
