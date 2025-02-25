@@ -2,13 +2,14 @@ import { View, TouchableOpacity, Text } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { useVideoStore } from "@/store/useVideoStore";
+import { useExtractFrames } from "@/hooks/useExtractFrames";
 
 const VideoPicker = ({ onVideoPicked, onClose }: any) => {
   const setVideo = useVideoStore((state) => state.setVideo);
+  const { mutate } = useExtractFrames();
 
   const pickVideo = async () => {
     const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
     console.log("Permission granted?", granted);
     if (!granted) {
       alert("Permission to access camera roll is required!");
@@ -32,7 +33,9 @@ const VideoPicker = ({ onVideoPicked, onClose }: any) => {
       };
 
       setVideo(video);
+      console.log("Video pickeddddd:", video.filePath);
       onVideoPicked(video);
+      mutate(video.filePath);
     }
   };
 
