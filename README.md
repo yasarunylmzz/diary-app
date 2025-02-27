@@ -66,3 +66,5 @@ Contributions are welcome! Please open an issue or submit a pull request.
 
 This project is licensed under the GNU General Public License v3.0.
 [untitled.webm](https://github.com/user-attachments/assets/472711ff-291b-44df-ba70-d9406fd2dc9a)
+<video src="https://github.com/user-attachments/assets/472711ff-291b-44df-ba70-d9406fd2dc9a" controls></video>
+
