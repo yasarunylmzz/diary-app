@@ -4,21 +4,22 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRef, useState, useEffect } from "react";
 import "../../global.css";
 import { Link } from "expo-router";
+import { useVideoStore } from "@/store/useVideoStore";
 
 interface VideoCardProps {
+  id: string;
   title: string;
   description: string;
   videoUri?: string;
-  duration?: string;
   createdAt?: string;
   onPress?: () => void;
 }
 
 export default function VideoCard({
+  id,
   title,
   description,
   videoUri,
-  duration,
   createdAt,
   onPress,
 }: VideoCardProps) {
@@ -27,40 +28,7 @@ export default function VideoCard({
   const [isPlaying, setIsPlaying] = useState(false);
   const screenWidth = Dimensions.get("window").width;
   const videoHeight = screenWidth * 0.55;
-
-  useEffect(() => {
-    if (videoUri) {
-      generateThumbnail();
-    }
-  }, [videoUri]);
-
-  const generateThumbnail = async () => {
-    try {
-      if (videoRef.current) {
-        await videoRef.current.loadAsync({ uri: videoUri! }, {}, false);
-        if (videoUri) {
-          setThumbnail(videoUri);
-        }
-        await videoRef.current.unloadAsync();
-      }
-    } catch (error) {
-      console.log("Thumbnail generation error:", error);
-    }
-  };
-
-  const handlePressIn = async () => {
-    if (videoRef.current && videoUri) {
-      setIsPlaying(true);
-      try {
-        await videoRef.current.loadAsync({ uri: videoUri }, {}, false);
-        await videoRef.current.setPositionAsync(0);
-        await videoRef.current.playAsync();
-      } catch (error) {
-        console.log("Preview playback error:", error);
-        setIsPlaying(false);
-      }
-    }
-  };
+  console.log(id);
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
@@ -77,14 +45,32 @@ export default function VideoCard({
         }
       }, 3000);
     }
+
     return () => clearTimeout(timeoutId);
   }, [isPlaying]);
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "";
+
+    const date = new Date(dateString);
+    return (
+      date.toLocaleDateString("tr-TR", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }) +
+      ` ${date.getHours()}:${date.getMinutes().toString().padStart(2, "0")}`
+    );
+  };
 
   return (
     <Link
       className="bg-gray-800 rounded-2xl overflow-hidden mx-4 mb-4 shadow-lg shadow-black/40"
-      href={videoUri ? "/DetailsPage" : ""}
-      onPress={!videoUri ? onPress : undefined}
+      href={{
+        pathname: "/DetailsPage",
+        params: { id },
+      }}
+      onPress={() => useVideoStore.getState().setSelectedVideoId(id)}
     >
       <View className="w-full bg-gray-700" style={{ height: videoHeight }}>
         {videoUri ? (
@@ -134,16 +120,9 @@ export default function VideoCard({
         {videoUri && (
           <View className="flex-row justify-between items-center">
             <View className="flex-row items-center bg-indigo-900/30 py-2 px-4 rounded-xl">
-              <Ionicons name="time-outline" size={16} color="#818CF8" />
-              <Text className="text-sm font-semibold text-indigo-400 ml-2">
-                {duration}s
-              </Text>
-            </View>
-
-            <View className="flex-row items-center bg-indigo-900/30 py-2 px-4 rounded-xl">
               <Ionicons name="calendar-outline" size={16} color="#818CF8" />
               <Text className="text-sm font-semibold text-indigo-400 ml-2">
-                {createdAt}
+                {formatDate(createdAt!)}
               </Text>
             </View>
           </View>

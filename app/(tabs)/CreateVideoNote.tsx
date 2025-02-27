@@ -7,18 +7,18 @@ import { useVideoStore } from "@/store/useVideoStore";
 
 const CreateVideoNote = () => {
   const [video, setVideo] = useState<{ uri: string } | null>(null);
-  const [frames, setFrames] = useState([]);
   const [startTime, setStartTime] = useState(0);
   const [noteType, setNoteType] = useState<"video" | "text">("video");
 
-  const videoSource = useVideoStore((state) => state.video?.filePath);
-  const videoTime = useVideoStore((state) => state.video?.duration);
+  const videoResponse = useVideoStore((state) => state.videoResponse);
+  const videoUrl = videoResponse?.video_url || "";
+  const frameCount = videoResponse?.frame_count || 0;
 
-  // Formatlanmış süreyi hesaplıyoruz
-  const formattedDuration = formatTime(videoTime ?? 0);
+  const formattedDuration = formatTime(frameCount);
+  const videoDuration = frameCount;
 
   return (
-    <SafeAreaView className="flex-1  bg-gray-900">
+    <SafeAreaView className="flex-1 bg-gray-900">
       <NoteTypeSelector noteType={noteType} setNoteType={setNoteType} />
 
       <ScrollView
@@ -29,13 +29,11 @@ const CreateVideoNote = () => {
           <VideoNoteSection
             video={video}
             setVideo={setVideo}
-            frames={frames}
-            setFrames={setFrames}
             startTime={startTime}
             setStartTime={setStartTime}
             formattedDuration={formattedDuration}
-            videoSource={videoSource ?? ""}
-            videoTime={videoTime ?? 0}
+            videoSource={videoUrl}
+            videoTime={videoDuration}
           />
         ) : (
           <TextNoteSection />
@@ -47,12 +45,11 @@ const CreateVideoNote = () => {
 
 export default CreateVideoNote;
 
-const formatTime = (milliseconds: number): string => {
-  const totalSeconds = Math.floor(milliseconds / 1000);
+const formatTime = (totalSeconds: number): string => {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
-  const formattedMinutes = String(minutes).padStart(2, "0");
-  const formattedSeconds = String(seconds).padStart(2, "0");
-
-  return `${formattedMinutes}:${formattedSeconds}`;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
+    2,
+    "0"
+  )}`;
 };

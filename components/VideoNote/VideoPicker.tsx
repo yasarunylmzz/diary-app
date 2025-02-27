@@ -1,12 +1,11 @@
 import { View, TouchableOpacity, Text } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
 import { useVideoStore } from "@/store/useVideoStore";
-import { useExtractFrames } from "@/hooks/useExtractFrames";
+import extractFrames from "@/script/extractFrames";
 
 const VideoPicker = ({ onVideoPicked, onClose }: any) => {
-  const setVideo = useVideoStore((state) => state.setVideo);
-  const { mutate } = useExtractFrames();
+  const setVideoResponse = useVideoStore((state) => state.setVideoResponse);
 
   const pickVideo = async () => {
     const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -17,25 +16,29 @@ const VideoPicker = ({ onVideoPicked, onClose }: any) => {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: "videos", // Yeni API ile uyumlu şekilde değiştirdim
+      mediaTypes: ImagePicker.MediaTypeOptions.Videos,
       quality: 1,
     });
 
     if (!result.canceled && result.assets?.[0]) {
+      const videoUri = result.assets[0].uri;
+      console.log("Video picked:", videoUri);
+
       const video = {
         id: Date.now(),
         name: result.assets[0].fileName || "video.mp4",
         description: "",
-        filePath: result.assets[0].uri,
+        filePath: videoUri,
         createdAt: new Date().toISOString(),
-        tags: [], // Add an empty array for tags
+        tags: [],
         duration: result.assets[0].duration ?? 0,
       };
 
-      setVideo(video);
-      console.log("Video pickeddddd:", video.filePath);
-      onVideoPicked(video);
-      mutate(video.filePath);
+      if (onVideoPicked) {
+        onVideoPicked(video);
+      }
+      console.log("buradayız");
+      extractFrames(videoUri);
     }
   };
 
@@ -50,7 +53,6 @@ const VideoPicker = ({ onVideoPicked, onClose }: any) => {
             style={{ transform: [{ rotate: "-15deg" }] }}
           />
         </View>
-
         <Text className="text-2xl font-extrabold text-gray-900 mb-2">
           Video Yükle
         </Text>
@@ -58,7 +60,6 @@ const VideoPicker = ({ onVideoPicked, onClose }: any) => {
           5 saniyeyi geçmeyen mükemmel anınızı seçin
         </Text>
       </View>
-
       <TouchableOpacity
         onPress={pickVideo}
         className="flex-row items-center justify-center bg-indigo-600 py-4 gap-2 px-6 rounded-xl space-x-3 
@@ -68,7 +69,6 @@ const VideoPicker = ({ onVideoPicked, onClose }: any) => {
         <FontAwesome name="photo" size={20} color="white" />
         <Text className="text-white font-bold text-lg">Galeriden Seç</Text>
       </TouchableOpacity>
-
       <View className="flex-row justify-center mt-8 gap-2 space-x-2">
         {[1, 2, 3].map((item) => (
           <View key={item} className="w-2 h-2 rounded-full bg-indigo-400" />

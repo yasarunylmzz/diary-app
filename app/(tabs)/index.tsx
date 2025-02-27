@@ -2,12 +2,42 @@ import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import VideoList from "../../components/CreateVideoNoteComponents/VideoList";
-import { Link } from "expo-router";
+import { getVideoNotes } from "@/db/schema";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+  const [videos, setVideos] = useState([]);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchVideos = async () => {
+      try {
+        setIsLoading(true);
+        const { success, data } = await getVideoNotes();
+        if (success) {
+          const formattedVideos = data.map((video: any) => ({
+            id: video.id,
+            title: video.name,
+            description: video.description,
+            videoUri: video.filePath,
+            duration: video.endTime - video.startTime,
+            createdAt: video.createdAt,
+          }));
+          setVideos(formattedVideos);
+          setError(null);
+        }
+      } catch (error) {
+        setError("Veriler yüklenirken bir hata oluştu");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchVideos();
+  }, []);
   return (
     <SafeAreaView className="flex-1 bg-gray-900" edges={["top"]}>
-      {/* Header */}
       <View className="px-6 py-4 bg-gray-900 ">
         <View className="flex-row items-center justify-between">
           <View>
@@ -35,17 +65,8 @@ export default function Home() {
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
-        <VideoList />
+        <VideoList videos={videos} isLoading={false} error={null} />
       </ScrollView>
-
-      {/* <Link
-        href={"/CreateVideoNote"}
-        className="absolute bottom-8 right-6 w-16 h-16 bg-blue-600 rounded-2xl items-center justify-center shadow-xl shadow-blue-500/30 active:bg-blue-700"
-      >
-        <View className="flex items-center w-full h-full font-extrabold justify-center">
-          <Ionicons name="add" size={32} color="white" />
-        </View>
-      </Link> */}
     </SafeAreaView>
   );
 }

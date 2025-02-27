@@ -1,5 +1,5 @@
 import { VideoView, useVideoPlayer } from "expo-video";
-import { TouchableOpacity, View } from "react-native";
+import { View } from "react-native";
 
 const VideoPlayer = ({ videoUri }: { videoUri: string }) => {
   const player = useVideoPlayer(videoUri, (player) => {

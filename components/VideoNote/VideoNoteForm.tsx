@@ -4,172 +4,208 @@ import {
   TouchableOpacity,
   Text,
   Animated,
+  Alert,
+  useWindowDimensions,
 } from "react-native";
 import { useState, useRef, useEffect } from "react";
 import { FontAwesome } from "@expo/vector-icons";
 import { useVideoStore } from "@/store/useVideoStore";
+import RNFS from "react-native-fs";
+import { trimVideo } from "@/script/trimVideo";
+import { useNavigation } from "@react-navigation/native";
+import createVideoNotes, { getVideoNotes } from "@/db/schema";
 
-const VideoNoteForm = ({ onSave }: any) => {
-  const { video } = useVideoStore((state) => state);
-  console.log("Video", video?.filePath);
+const VideoNoteForm = () => {
+  const { width } = useWindowDimensions();
+  const navigation = useNavigation();
+  const {
+    videoResponse,
+    selectedStartTime,
+    selectedEndTime,
+    setVideoResponse,
+    clearVideoResponse,
+  } = useVideoStore();
   const [note, setNote] = useState({ name: "", description: "" });
-  const [isFocused, setIsFocused] = useState({
-    name: false,
-    description: false,
-  });
+  const [isProcessing, setIsProcessing] = useState(false);
   const animatedValue = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.loop(
+    const animation = Animated.loop(
       Animated.sequence([
         Animated.timing(animatedValue, {
           toValue: 1,
-          duration: 2000,
+          duration: 1500,
           useNativeDriver: true,
         }),
         Animated.timing(animatedValue, {
           toValue: 0,
-          duration: 2000,
+          duration: 1500,
           useNativeDriver: true,
         }),
       ])
-    ).start();
+    );
+    animation.start();
+    return () => animation.stop();
   }, []);
+
+  const handleSaveNote = async () => {
+    if (!note.name.trim() || !note.description.trim()) {
+      Alert.alert(
+        "Eksik Bilgi",
+        "Lütfen başlık ve açıklama alanlarını doldurun"
+      );
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      const trimmedPath = await trimVideo();
+
+      const cleanupTasks = [
+        ...(videoResponse?.video_url
+          ? [RNFS.unlink(videoResponse.video_url)]
+          : []),
+        ...(videoResponse?.frames?.map((frame) =>
+          RNFS.unlink(frame).catch(() => {})
+        ) || []),
+      ];
+
+      await Promise.all(cleanupTasks);
+
+      const videoEntry = {
+        name: note.name,
+        description: note.description,
+        filePath: trimmedPath,
+        startTime: selectedStartTime,
+        endTime: selectedEndTime,
+      };
+
+      await createVideoNotes(videoEntry);
+
+      const { success, data } = await getVideoNotes();
+
+      Alert.alert("Başarılı", "Notunuz ve video başarıyla kaydedildi 🎉");
+    } catch (error) {
+      Alert.alert(
+        "Hata Oluştu",
+        error instanceof Error
+          ? error.message
+          : "Video işleme sırasında bir sorun oluştu"
+      );
+    } finally {
+      setIsProcessing(false);
+      await getVideoNotes();
+      clearVideoResponse();
+    }
+  };
 
   const buttonScale = animatedValue.interpolate({
     inputRange: [0, 0.5, 1],
-    outputRange: [1, 1.03, 1],
+    outputRange: [1, 1.05, 1],
   });
 
-  const renderCharacterCount = (text: any, maxCount = 100) => {
-    const count = text?.length || 0;
+  const CharacterCounter = ({ text, max }: { text: string; max: number }) => {
+    const count = text.length;
     const color =
-      count > maxCount * 0.8
-        ? count > maxCount
-          ? "#ef4444"
-          : "#f59e0b"
-        : "#9ca3af";
+      count > max ? "#ef4444" : count > max * 0.8 ? "#f59e0b" : "#64748b";
 
     return (
-      <Text style={{ color, fontSize: 10 }} className="text-right mt-1">
-        {count}/{maxCount}
+      <Text
+        className="text-right mt-1.5"
+        style={{ color, fontSize: 11, lineHeight: 16 }}
+      >
+        {count}/{max}
       </Text>
     );
   };
 
   return (
-    <View className="bg-gradient-to-b from-gray-900 to-gray-800 rounded-3xl shadow-2xl mt-10 mx-2 my-4">
-      <View className="flex-row items-center justify-between  mb-3">
-        <View className="flex-row items-center">
-          <View className=" rounded-full mr-3">
-            <FontAwesome name="pencil" size={20} color="#ffffff" />
-          </View>
-          <Text className="text-white text-xl font-bold tracking-wide">
-            Video Notları
-          </Text>
-        </View>
+    <View
+      className="bg-gray-900 rounded-xl"
+      style={{
+        width: width - 24,
+        shadowColor: "#020617",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 12,
+        elevation: 8,
+      }}
+    >
+      <View className="flex-row items-center mb-5">
+        <FontAwesome
+          name="video-camera"
+          size={20}
+          color="#3B82F6"
+          style={{ marginRight: 10 }}
+        />
+        <Text className="text-white text-xl font-bold tracking-tight">
+          Video Not Kaydı
+        </Text>
       </View>
 
-      <View
-        className={`bg-gray-800/40 backdrop-blur-lg rounded-2xl p-5 mb-5 ${
-          isFocused.name ? "border border-blue-500/50" : ""
-        }`}
-      >
-        <View className="flex-row items-center justify-between">
-          <Text className="text-blue-400 text-xs font-medium uppercase tracking-wider mb-2 ml-1">
-            Not Başlığı
+      <View className="bg-gray-800/60 rounded-lg p-3 mb-4 border border-gray-700/50">
+        <View className="flex-row justify-between mb-2">
+          <Text className="text-blue-400 text-xs font-semibold uppercase tracking-wide">
+            BAŞLIK
           </Text>
-          <FontAwesome name="header" size={12} color="#60a5fa" />
+          <FontAwesome name="tag" size={12} color="#60a5fa" />
         </View>
-
         <TextInput
-          className="text-white text-lg pb-2"
-          placeholder="Video için etkileyici bir başlık girin"
-          placeholderTextColor="#6b7280"
+          className="text-white text-[15px] leading-5 pb-1.5"
+          placeholder="Örneğin: 'Yeni Ürün Lansmanı'"
+          placeholderTextColor="#64748b"
           value={note.name}
-          onChangeText={(text) => setNote({ ...note, name: text })}
-          onFocus={() => setIsFocused({ ...isFocused, name: true })}
-          onBlur={() => setIsFocused({ ...isFocused, name: false })}
-          style={{
-            borderBottomWidth: 1,
-            borderBottomColor: isFocused.name
-              ? "rgba(96, 165, 250, 0.7)"
-              : "rgba(96, 165, 250, 0.3)",
-          }}
+          onChangeText={(text) => setNote((p) => ({ ...p, name: text }))}
+          maxLength={50}
+          style={{ height: 34 }}
+          selectionColor="#3B82F6"
         />
-        {renderCharacterCount(note.name, 50)}
+        <CharacterCounter text={note.name} max={50} />
       </View>
 
-      <View
-        className={`bg-gray-800/40 backdrop-blur-lg rounded-2xl p-5 mb-7 ${
-          isFocused.description ? "border border-blue-500/50" : ""
-        }`}
-      >
-        <View className="flex-row items-center justify-between">
-          <Text className="text-blue-400 text-xs font-medium uppercase tracking-wider mb-2 ml-1">
-            Açıklama
+      <View className="bg-gray-800/60 rounded-lg p-3 mb-6 border border-gray-700/50">
+        <View className="flex-row justify-between mb-2">
+          <Text className="text-blue-400 text-xs font-semibold uppercase tracking-wide">
+            AÇIKLAMA
           </Text>
-          <FontAwesome name="align-left" size={14} color="#60a5fa" />
+          <FontAwesome name="align-left" size={12} color="#60a5fa" />
         </View>
-
         <TextInput
-          className="text-white text-lg pb-2"
-          placeholder="Detaylı açıklama girin..."
-          placeholderTextColor="#6b7280"
-          multiline={true}
-          numberOfLines={4}
-          textAlignVertical="top"
+          className="text-white text-[15px] leading-5 pb-1.5"
+          placeholder="Detayları buraya yazın..."
+          placeholderTextColor="#64748b"
+          multiline
           value={note.description}
-          onChangeText={(text) => setNote({ ...note, description: text })}
-          onFocus={() => setIsFocused({ ...isFocused, description: true })}
-          onBlur={() => setIsFocused({ ...isFocused, description: false })}
-          style={{
-            borderBottomWidth: 1,
-            borderBottomColor: isFocused.description
-              ? "rgba(96, 165, 250, 0.7)"
-              : "rgba(96, 165, 250, 0.3)",
-            minHeight: 100,
-          }}
+          onChangeText={(text) => setNote((p) => ({ ...p, description: text }))}
+          maxLength={500}
+          style={{ minHeight: 100, textAlignVertical: "top" }}
+          selectionColor="#3B82F6"
         />
-        {renderCharacterCount(note.description, 500)}
+        <CharacterCounter text={note.description} max={500} />
       </View>
 
       <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
         <TouchableOpacity
-          className="bg-gradient-to-r from-blue-600 to-indigo-500 rounded-2xl py-4 items-center shadow-lg mb-3"
-          onPress={() => onSave(note)}
-          style={{
-            shadowColor: "#3b82f6",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 10,
-          }}
+          className={`bg-blue-600 rounded-lg py-3.5 ${
+            isProcessing ? "opacity-90" : ""
+          }`}
+          onPress={handleSaveNote}
+          disabled={isProcessing}
+          activeOpacity={0.85}
         >
-          <View className="flex-row items-center">
+          <View className="flex-row items-center justify-center space-x-2">
             <FontAwesome
-              name="save"
-              size={18}
-              color="#ffffff"
-              className="mr-2"
+              name={isProcessing ? "circle-o-notch" : "save"}
+              size={16}
+              color="white"
+              style={isProcessing ? { transform: [{ rotate: "90deg" }] } : {}}
             />
-            <Text className="text-white font-bold text-lg">Notu Kaydet</Text>
+            <Text className="text-white text-base font-semibold tracking-wide">
+              {isProcessing ? "KAYDEDİLİYOR..." : "NOTU KAYDET"}
+            </Text>
           </View>
         </TouchableOpacity>
       </Animated.View>
-
-      <View className="bg-gray-800/30 rounded-xl p-3 mt-2">
-        <View className="flex-row items-center justify-center">
-          <FontAwesome
-            name="info-circle"
-            size={12}
-            color="#9ca3af"
-            className="mr-2"
-          />
-          <Text className="text-gray-400 text-xs">
-            Kaydettiğiniz not video veri tabanına eklenecektir
-          </Text>
-        </View>
-      </View>
     </View>
   );
 };

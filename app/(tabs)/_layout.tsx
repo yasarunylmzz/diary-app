@@ -10,9 +10,9 @@ export default function TabLayout() {
         headerShown: false,
         tabBarStyle: {
           borderTopColor: "transparent",
-          elevation: 0,
-          borderTopWidth: 4, // 1. Çizgiyi tamamen kaldır
-          backgroundColor: "#111827", // 2. Arkaplan rengini ekle
+          elevation: 10,
+          borderTopWidth: 0,
+          backgroundColor: "#111827",
         },
       }}
     >
@@ -32,8 +32,8 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <View
               style={{
-                top: -20, // Yukarı taşı
-                backgroundColor: "rgba(99, 102, 241, 0.9)", // Yarı saydam mor arkaplan
+                top: -20,
+                backgroundColor: "rgba(99, 102, 241, 0.9)",
                 borderRadius: 35,
                 width: 70,
                 height: 70,
@@ -41,7 +41,7 @@ export default function TabLayout() {
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 1,
                 shadowRadius: 15,
-                elevation: 10, // Android için gölge
+                elevation: 10,
                 alignItems: "center",
                 justifyContent: "center",
               }}

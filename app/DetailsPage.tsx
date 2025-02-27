@@ -4,26 +4,94 @@ import {
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
+  ActivityIndicator,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Video } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { getVideoNotes } from "@/db/schema";
 
 const DetailsPage = () => {
   const [status, setStatus] = useState({});
   const [isFavorite, setIsFavorite] = useState(false);
   const router = useRouter();
+  const { id } = useLocalSearchParams();
 
-  const dummyData = {
-    title: "Günlük Video #1",
-    description:
-      "Bugün harika bir gündü! Sabah erkenden kalkıp sahilde yürüyüs yaptım...",
-    videoUri:
-      "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-    duration: "5",
-    createdAt: "12 Mart 2024",
-  };
+  interface VideoDetail {
+    id: string;
+    title: string;
+    description: string;
+    videoUri: string;
+    duration: number;
+    createdAt: string;
+  }
+
+  const [videoDetail, setVideoDetail] = useState<VideoDetail | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchVideoDetail = async () => {
+      try {
+        setIsLoading(true);
+        const { success, data } = await getVideoNotes();
+        if (success) {
+          const formattedVideos = data.map((video: any) => ({
+            id: video.id,
+            title: video.name,
+            description: video.description,
+            videoUri: video.filePath,
+            duration: video.endTime - video.startTime,
+            createdAt: new Date(video.createdAt).toLocaleDateString("tr-TR"),
+          }));
+
+          const foundVideo = formattedVideos.find(
+            (video: any) => video.id === id
+          );
+          if (foundVideo) {
+            setVideoDetail(foundVideo);
+          } else {
+            setError("Video bulunamadı");
+          }
+        } else {
+          setError("Veri alınamadı");
+        }
+      } catch (error) {
+        setError("Veriler yüklenirken bir hata oluştu");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchVideoDetail();
+  }, [id]);
+
+  if (isLoading) {
+    return (
+      <SafeAreaView className="flex-1 bg-gray-900 items-center justify-center">
+        <ActivityIndicator size="large" color="#818CF8" />
+        <Text className="text-gray-300 mt-4">Yükleniyor...</Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (error || !videoDetail) {
+    return (
+      <SafeAreaView className="flex-1 bg-gray-900 items-center justify-center">
+        <Ionicons name="alert-circle-outline" size={48} color="#EF4444" />
+        <Text className="text-gray-300 mt-4">
+          {error || "Video bulunamadı"}
+        </Text>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="mt-4 bg-gray-700 px-4 py-2 rounded-full"
+        >
+          <Text className="text-gray-100">Geri Dön</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-gray-900">
@@ -37,7 +105,7 @@ const DetailsPage = () => {
 
         <View className="flex-row justify-between items-center mb-4 mt-2">
           <Text className="text-2xl font-bold text-gray-100">
-            {dummyData.title}
+            {videoDetail.title}
           </Text>
           <TouchableOpacity
             onPress={() => setIsFavorite(!isFavorite)}
@@ -55,20 +123,35 @@ const DetailsPage = () => {
           <View className="flex-row items-center bg-indigo-900/30 px-3 py-1 rounded-full">
             <Ionicons name="time-outline" size={16} color="#818CF8" />
             <Text className="text-indigo-400 ml-1 font-medium">
-              {dummyData.duration}s
+              {videoDetail.duration}s
             </Text>
           </View>
           <View className="flex-row items-center bg-indigo-900/30 px-3 py-1 rounded-full">
             <Ionicons name="calendar-outline" size={16} color="#818CF8" />
             <Text className="text-indigo-400 ml-1 font-medium">
-              {dummyData.createdAt}
+              {videoDetail.createdAt}
             </Text>
           </View>
         </View>
 
+        {videoDetail.videoUri && (
+          <View className="mb-4 rounded-xl overflow-hidden">
+            <Video
+              source={{ uri: videoDetail.videoUri }}
+              rate={1.0}
+              volume={1.0}
+              isMuted={false}
+              shouldPlay={false}
+              useNativeControls
+              style={{ height: 200 }}
+              onPlaybackStatusUpdate={(status) => setStatus(() => status)}
+            />
+          </View>
+        )}
+
         <ScrollView className="flex-1 mb-6">
           <Text className="text-lg text-gray-300 leading-relaxed">
-            {dummyData.description}
+            {videoDetail.description}
           </Text>
         </ScrollView>
 

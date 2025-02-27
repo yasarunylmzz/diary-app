@@ -1,59 +1,104 @@
-import { View, Text } from "react-native";
+import React from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import VideoCard from "./VideoCard";
+import { useRouter } from "expo-router";
 
-export default function VideoList() {
-  const videos = [
-    {
-      id: "1",
-      title: "Günlük Video #1",
-      description:
-        "Bugün harika bir gündü! Sabah erkenden kalkıp sahilde yürüyüş yaptım...",
-      videoUri:
-        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-      duration: "5",
-      createdAt: "12 Mart 2024",
-    },
-    {
-      id: "2",
-      title: "Akşam Düşünceleri",
-      description:
-        "Bu akşam yeni projemi planladım ve bazı önemli kararlar aldım...",
-      videoUri:
-        "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-      duration: "4",
-      createdAt: "11 Mart 2024",
-    },
-  ];
+type Video = {
+  id: number;
+  title: string;
+  videoUri: string;
+  description: string;
+  duration: number;
+  createdAt: string;
+};
+
+type VideoListProps = {
+  videos: Video[];
+  isLoading?: boolean;
+  error?: string | null;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
+};
+
+export default function VideoList({
+  videos = [],
+  isLoading = false,
+  error = null,
+  onRefresh,
+  isRefreshing = false,
+}: VideoListProps) {
+  const router = useRouter();
+
+  const handleVideoPress = (videoId: number) => {
+    router.push({
+      pathname: "/details",
+      params: { id: videoId },
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <View className="flex-1 justify-center items-center p-4">
+        <ActivityIndicator size="large" color="#818CF8" />
+        <Text className="text-gray-500 mt-3">Videolar yükleniyor...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View className="flex-1 justify-center items-center p-4">
+        <Ionicons name="alert-circle-outline" size={40} color="#EF4444" />
+        <Text className="text-center text-gray-500 mt-2">{error}</Text>
+        {onRefresh && (
+          <TouchableOpacity
+            onPress={onRefresh}
+            className="mt-4 bg-indigo-600 px-4 py-2 rounded-full"
+          >
+            <Text className="text-white">Tekrar Dene</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  }
 
   if (videos.length === 0) {
     return (
-      <View className="p-4">
-        <View className="mt-6 items-center">
-          <Ionicons name="videocam-outline" size={40} color="#4b5563" />
-          <Text className="text-center text-gray-500 mt-2 text-sm px-8">
-            Henüz video eklemediniz, alttaki butondan ilk anınızı kaydedin!
-          </Text>
-        </View>
+      <View className="flex-1 justify-center items-center p-4">
+        <Ionicons name="videocam-outline" size={40} color="#4b5563" />
+        <Text className="text-center text-gray-500 mt-2 text-sm px-8">
+          Henüz video eklemediniz, alttaki butondan ilk anınızı kaydedin!
+        </Text>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 pt-4">
-      {videos.map((video) => (
+    <FlatList
+      data={videos}
+      keyExtractor={(item) => item.id.toString()}
+      renderItem={({ item }) => (
         <VideoCard
-          key={video.id}
-          title={video.title}
-          description={video.description}
-          videoUri={video.videoUri}
-          duration={video.duration}
-          createdAt={video.createdAt}
-          onPress={() => {
-            console.log(`Video ${video.id} tıklandı`);
-          }}
+          title={item.title}
+          description={item.description}
+          videoUri={item.videoUri}
+          createdAt={item.createdAt}
+          onPress={() => handleVideoPress(item.id)}
+          id={""}
         />
-      ))}
-    </View>
+      )}
+      className="flex-1"
+      contentContainerStyle={{ paddingTop: 16, paddingBottom: 24 }}
+      refreshing={isRefreshing}
+      onRefresh={onRefresh}
+      showsVerticalScrollIndicator={false}
+    />
   );
 }

@@ -9,9 +9,7 @@ import { Ionicons } from "@expo/vector-icons";
 interface VideoNoteSectionProps {
   video: { uri: string } | null;
   setVideo: (video: { uri: string } | null) => void;
-  frames: any[];
   startTime: number;
-  setFrames: (frames: any[]) => void;
   setStartTime: (time: number) => void;
   formattedDuration: string;
   videoSource: string;
@@ -21,8 +19,6 @@ interface VideoNoteSectionProps {
 const VideoNoteSection: FC<VideoNoteSectionProps> = ({
   video,
   setVideo,
-  frames,
-  setFrames,
   startTime,
   setStartTime,
   formattedDuration,
@@ -52,23 +48,18 @@ const VideoNoteSection: FC<VideoNoteSectionProps> = ({
       </View>
 
       <View className="aspect-video bg-black rounded-2xl w-full overflow-hidden mb-6">
-        <VideoPlayer videoUri={videoSource || ""} />
+        <VideoPlayer videoUri={videoSource} />
       </View>
 
       <View className="h-24 mb-6">
-        <View className="h-24 mb-6">
-          <Timeline
-            frames={frames}
-            onUpdateSelection={setStartTime}
-            onUpdateFrames={setFrames}
-            videoDuration={videoTime ?? 0}
-            videoSource={videoSource}
-            initialPosition={startTime}
-          />
-        </View>
+        <Timeline
+          onUpdateSelection={setStartTime}
+          videoDuration={videoTime}
+          initialPosition={startTime}
+        />
       </View>
 
-      <VideoNoteForm onSave={(note: any) => console.log("Saved note:", note)} />
+      <VideoNoteForm />
     </View>
   );
 };
